@@ -26,6 +26,7 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: github-pages # TOOLS_TOKEN is an environment secret
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
