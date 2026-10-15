@@ -1,0 +1,73 @@
+name: Deploy all tool UIs to GitHub Pages
+
+# Hosts the three static UIs at the site root (https://quocchungthan.github.io/):
+#   /                                  landing page
+#   /para-bridge/                      Bridge            (public repo quocchungthan/PARA-AI-solution)
+#   /tools-w-productioncore-aids/      Production Core Aids (private repo)
+#   /tools-s-exploring-local/          Local café explorer  (private repo)
+# Needs the repo secret TOOLS_TOKEN: fine-grained PAT with Contents:read on the three repos above.
+
+on:
+  push:
+    branches: [main]
+  repository_dispatch:
+    types: [tool-updated]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: quocchungthan/PARA-AI-solution
+          token: ${{ secrets.TOOLS_TOKEN }}
+          path: src/bridge
+      - uses: actions/checkout@v4
+        with:
+          repository: quocchungthan/tools-w-productioncore-aids
+          token: ${{ secrets.TOOLS_TOKEN }}
+          path: src/aids
+      - uses: actions/checkout@v4
+        with:
+          repository: quocchungthan/tools-s-exploring-local
+          token: ${{ secrets.TOOLS_TOKEN }}
+          path: src/exploring
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Build all UIs
+        run: |
+          set -e
+          build() { (cd "$1" && npm ci && npm run build); }
+          build src/bridge/web
+          build src/aids/web
+          build src/exploring/web
+          mkdir -p site/para-bridge site/tools-w-productioncore-aids site/tools-s-exploring-local
+          cp -r landing/. site/
+          cp -r src/bridge/web/dist/. site/para-bridge/
+          cp -r src/aids/web/dist/. site/tools-w-productioncore-aids/
+          cp -r src/exploring/web/dist/. site/tools-s-exploring-local/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

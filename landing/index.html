@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chung's local-first tools</title>
+  <style>
+    body { margin: 0; font-family: system-ui, sans-serif; background: #0b1020; color: #e6e9f2; }
+    main { max-width: 720px; margin: 0 auto; padding: 48px 20px; }
+    a.card { display: block; padding: 16px 18px; margin: 12px 0; border: 1px solid #263055; border-radius: 12px; color: inherit; text-decoration: none; background: #121a33; }
+    a.card:hover { border-color: #5b8cff; }
+    small { color: #8f9bc0; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Local-first tools</h1>
+    <p><small>Each page is a static UI that talks to a service running on your own machine (localhost).</small></p>
+    <a class="card" href="para-bridge/"><strong>PARA Bridge</strong><br /><small>Observe agent/session cluster · needs local service on :5310</small></a>
+    <a class="card" href="tools-w-productioncore-aids/"><strong>Production Core Aids</strong><br /><small>Dependency &amp; tool watch · needs local service on :5311</small></a>
+    <a class="card" href="tools-s-exploring-local/"><strong>Local café explorer</strong><br /><small>Find highly rated cafés nearby · needs local service on :5312</small></a>
+  </main>
+</body>
+</html>
