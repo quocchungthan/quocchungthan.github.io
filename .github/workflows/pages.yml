@@ -1,11 +1,12 @@
 name: Deploy all tool UIs to GitHub Pages
 
-# Hosts the three static UIs at the site root (https://quocchungthan.github.io/):
+# Hosts the static UIs at the site root (https://quocchungthan.github.io/):
 #   /                                  landing page
 #   /para-bridge/                      Bridge            (public repo quocchungthan/PARA-AI-solution)
 #   /tools-w-productioncore-aids/      Production Core Aids (private repo)
 #   /tools-s-exploring-local/          Local café explorer  (private repo)
-# Needs the repo secret TOOLS_TOKEN: fine-grained PAT with Contents:read on the three repos above.
+#   /tools-w-disklens/                 DiskLens             (private repo)
+# Needs TOOLS_TOKEN with Contents:read on all source repos above.
 
 on:
   push:
@@ -44,9 +45,14 @@ jobs:
           repository: quocchungthan/tools-s-exploring-local
           token: ${{ secrets.TOOLS_TOKEN }}
           path: src/exploring
+      - uses: actions/checkout@v4
+        with:
+          repository: quocchungthan/tools-w-disklens
+          token: ${{ secrets.TOOLS_TOKEN }}
+          path: src/disklens
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
       - name: Build all UIs
         run: |
           set -e
@@ -54,11 +60,13 @@ jobs:
           build src/bridge/web
           build src/aids/web
           build src/exploring/web
-          mkdir -p site/para-bridge site/tools-w-productioncore-aids site/tools-s-exploring-local
+          (cd src/disklens/client && npm ci && npm run build:pages)
+          mkdir -p site/para-bridge site/tools-w-productioncore-aids site/tools-s-exploring-local site/tools-w-disklens
           cp -r landing/. site/
           cp -r src/bridge/web/dist/. site/para-bridge/
           cp -r src/aids/web/dist/. site/tools-w-productioncore-aids/
           cp -r src/exploring/web/dist/. site/tools-s-exploring-local/
+          cp -r src/disklens/client/dist/. site/tools-w-disklens/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
