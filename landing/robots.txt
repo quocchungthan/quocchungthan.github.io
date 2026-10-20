@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /tools-w-productioncore-aids/
+Disallow: /tools-s-exploring-local/
+
+Sitemap: https://quocchungthan.github.io/sitemap.xml
