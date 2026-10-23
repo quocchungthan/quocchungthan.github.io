@@ -6,7 +6,8 @@ name: Deploy all tool UIs to GitHub Pages
 #   /tools-w-productioncore-aids/      Production Core Aids (private repo)
 #   /tools-s-exploring-local/          Local café explorer  (private repo)
 #   /tools-w-disklens/                 DiskLens             (private repo)
-# TOOLS_TOKEN needs Contents:read on Bridge/EMFc and Actions:read on EMFc.
+# TOOLS_TOKEN reads Bridge; SINGLE_UI_TOKEN reads producer contents/actions.
+# Existing TOOLS_TOKEN can also supply producer access when authorized for it.
 
 on:
   push:
@@ -38,7 +39,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: quocchungthan/EMFc-experiments
-          token: ${{ secrets.TOOLS_TOKEN }}
+          token: ${{ secrets.SINGLE_UI_TOKEN || secrets.TOOLS_TOKEN }}
           ref: ${{ vars.SINGLE_UI_REVISION }}
           path: src/single-ui
       - uses: actions/setup-node@v4
@@ -46,7 +47,7 @@ jobs:
           node-version: 22
       - name: Import pinned SingleUI bundles and build Bridge
         env:
-          GH_TOKEN: ${{ secrets.TOOLS_TOKEN }}
+          GH_TOKEN: ${{ secrets.SINGLE_UI_TOKEN || secrets.TOOLS_TOKEN }}
           SINGLE_UI_RUN_ID: ${{ vars.SINGLE_UI_RUN_ID }}
           SINGLE_UI_REVISION: ${{ vars.SINGLE_UI_REVISION }}
         run: |

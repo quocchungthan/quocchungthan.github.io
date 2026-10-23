@@ -20,16 +20,18 @@ relative asset base. CarResearch/car search is not built or linked.
 
 1. Create this repo as **public** with the exact name `quocchungthan.github.io` and push `main`.
 2. Settings → Pages → Source = **GitHub Actions**.
-3. Settings → Secrets → Actions → `TOOLS_TOKEN`: fine-grained PAT with
-   **Contents: read** on PARA-AI-solution and EMFc-experiments, and **Actions: read**
-   on EMFc-experiments. The existing `github-pages` environment owns this secret.
+3. Keep `TOOLS_TOKEN` with **Contents: read** on PARA-AI-solution. Add
+   `SINGLE_UI_TOKEN` with **Contents: read** and **Actions: read** on
+   EMFc-experiments. Secrets may be in the existing `github-pages` environment.
+   For compatibility, the importer can use `TOOLS_TOKEN` if `SINGLE_UI_TOKEN`
+   is absent and that existing token already has the required producer access.
 4. Set repository variables `SINGLE_UI_RUN_ID` and `SINGLE_UI_REVISION` to a
    successful main-branch **SingleUI apps and skins** run and its full commit SHA.
    The importer rejects failed/PR runs, mismatched revisions and damaged files.
    Artifacts expire after 90 days: retain a verified operator copy and refresh
    the pin before the next deployment. Expired/missing artifacts fail the build,
    leaving the currently deployed site intact.
-4. Optional auto-redeploy: in each source repo add secret `PAGES_DISPATCH_TOKEN` (PAT with **Contents: write**
+5. Optional auto-redeploy: in each source repo add secret `PAGES_DISPATCH_TOKEN` (PAT with **Contents: write**
    on this repo). Without it, run the "Deploy all tool UIs" workflow here manually after changes.
 
 Each source repo's README has the local-run instructions and the AFFiNE Tools-row snippet.
