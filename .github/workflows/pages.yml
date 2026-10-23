@@ -6,7 +6,7 @@ name: Deploy all tool UIs to GitHub Pages
 #   /tools-w-productioncore-aids/      Production Core Aids (private repo)
 #   /tools-s-exploring-local/          Local café explorer  (private repo)
 #   /tools-w-disklens/                 DiskLens             (private repo)
-# Needs TOOLS_TOKEN with Contents:read on all source repos above.
+# TOOLS_TOKEN needs Contents:read on Bridge/EMFc and Actions:read on EMFc.
 
 on:
   push:
@@ -37,36 +37,32 @@ jobs:
           path: src/bridge
       - uses: actions/checkout@v4
         with:
-          repository: quocchungthan/tools-w-productioncore-aids
+          repository: quocchungthan/EMFc-experiments
           token: ${{ secrets.TOOLS_TOKEN }}
-          path: src/aids
-      - uses: actions/checkout@v4
-        with:
-          repository: quocchungthan/tools-s-exploring-local
-          token: ${{ secrets.TOOLS_TOKEN }}
-          path: src/exploring
-      - uses: actions/checkout@v4
-        with:
-          repository: quocchungthan/tools-w-disklens
-          token: ${{ secrets.TOOLS_TOKEN }}
-          path: src/disklens
+          ref: ${{ vars.SINGLE_UI_REVISION }}
+          path: src/single-ui
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Build all UIs
+      - name: Import pinned SingleUI bundles and build Bridge
+        env:
+          GH_TOKEN: ${{ secrets.TOOLS_TOKEN }}
+          SINGLE_UI_RUN_ID: ${{ vars.SINGLE_UI_RUN_ID }}
+          SINGLE_UI_REVISION: ${{ vars.SINGLE_UI_REVISION }}
         run: |
-          set -e
+          set -euo pipefail
+          [[ "$SINGLE_UI_REVISION" =~ ^[a-f0-9]{40}$ ]] || { echo "::error::Set SINGLE_UI_REVISION to the artifact source SHA"; exit 1; }
           build() { (cd "$1" && npm ci && npm run build); }
           build src/bridge/web
-          build src/aids/web
-          build src/exploring/web
-          (cd src/disklens/client && npm ci && npm run build:pages)
-          mkdir -p site/para-bridge site/tools-w-productioncore-aids site/tools-s-exploring-local site/tools-w-disklens
+          mkdir -p site/para-bridge
           cp -r landing/. site/
           cp -r src/bridge/web/dist/. site/para-bridge/
-          cp -r src/aids/web/dist/. site/tools-w-productioncore-aids/
-          cp -r src/exploring/web/dist/. site/tools-s-exploring-local/
-          cp -r src/disklens/client/dist/. site/tools-w-disklens/
+          importer=src/single-ui/SingleUI/deployment/artifacts/import-app.mjs
+          node "$importer" productioncore-aids site/tools-w-productioncore-aids
+          node "$importer" exploring-local site/tools-s-exploring-local
+          node "$importer" disklens site/tools-w-disklens
+          touch site/.nojekyll
+          echo "SingleUI run $SINGLE_UI_RUN_ID ($SINGLE_UI_REVISION); existing tool paths retained; no CarResearch bundle." >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
