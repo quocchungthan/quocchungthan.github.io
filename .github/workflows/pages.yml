@@ -53,12 +53,9 @@ jobs:
         run: |
           set -euo pipefail
           [[ "$SINGLE_UI_REVISION" =~ ^[a-f0-9]{40}$ ]] || { echo "::error::Set SINGLE_UI_REVISION to the artifact source SHA"; exit 1; }
-          build() { (cd "$1" && npm ci && npm run build); }
-          build src/bridge/web
-          mkdir -p site/para-bridge
           cp -r landing/. site/
-          cp -r src/bridge/web/dist/. site/para-bridge/
           importer=src/single-ui/SingleUI/deployment/artifacts/import-app.mjs
+          node "$importer" para-ai site/para-bridge
           node "$importer" productioncore-aids site/tools-w-productioncore-aids
           node "$importer" exploring-local site/tools-s-exploring-local
           node "$importer" disklens site/tools-w-disklens
